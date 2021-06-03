@@ -1,0 +1,38 @@
+trigger:
+  - staging
+
+variables:
+  # STEP 1: Define api name in cloud
+  api-name: user-notification-api
+  api-image-name: "$(acrname).azurecr.io/$(api-name):$(build.buildId)"
+
+jobs:
+  - job: Api_Staging
+    steps:
+      - task: DownloadSecureFile@1
+        name: mySecureFile
+        displayName: "download env file"
+        inputs:
+          secureFile: .env.staging
+      - task: CopyFiles@2
+        displayName: "copy env file"
+        inputs:
+          SourceFolder: $(Agent.TempDirectory)
+          Contents: '**\.env.staging'
+          TargetFolder: $(Build.SourcesDirectory)
+      - script: mv .env.staging .env
+        displayName: "renaming env file"
+      - script: echo "$(appPassword)" | docker login -u $(appId) --password-stdin $(acrname).azurecr.io
+        displayName: "docker login"
+      - script: docker build -f ./Dockerfile -t $(api-image-name) .
+        displayName: "docker build api"
+      - script: docker push $(api-image-name)
+        displayName: "docker push api"
+
+  - job: Publish_Artifacts
+    steps:
+      - bash: find ./pipelines/staging/resource-manifests -type f -name "*.yaml" -print0 | xargs -0 sed -i -e "s/{{TAG}}/$(build.buildId)/" -e "s/{{DOCKER_USER}}/$(acrname).azurecr.io/"
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: "$(System.DefaultWorkingDirectory)/pipelines/staging/resource-manifests"
+          artifactName: resource-manifests

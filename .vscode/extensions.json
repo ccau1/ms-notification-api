@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "eamodio.gitlens",
+    "donjayamanne.githistory",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-azuretools.vscode-docker",
+    "mhutchie.git-graph",
+    "ms-vsliveshare.vsliveshare",
+    "esbenp.prettier-vscode",
+    "gruntfuggly.todo-tree",
+    "vscode-icons-team.vscode-icons",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}
